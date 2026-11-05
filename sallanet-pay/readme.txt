@@ -4,7 +4,7 @@ Tested up to: 6.8
 Requires PHP: 7.4
 WC requires at least: 8.0
 WC tested up to: 10.3
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 License: GPLv2 or later
 
 Accept Pi and ST in WooCommerce through the sallanet Pay hosted checkout.
