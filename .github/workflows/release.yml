@@ -21,7 +21,11 @@ jobs:
       - name: Lint PHP
         run: for f in $(find sallanet-pay -name '*.php'); do php -l "$f"; done
       - name: Build zip
-        run: zip -qr "sallanet-pay-woocommerce-${{ steps.v.outputs.version }}.zip" sallanet-pay LICENSE
+        # WordPress needs exactly one folder at the zip root, so LICENSE goes inside it.
+        run: |
+          cp LICENSE sallanet-pay/LICENSE
+          zip -qr "sallanet-pay-woocommerce-${{ steps.v.outputs.version }}.zip" sallanet-pay
+          unzip -l "sallanet-pay-woocommerce-${{ steps.v.outputs.version }}.zip" | awk 'NR>3 {print $4}' | grep -v '^sallanet-pay/' | grep -v '^$' && exit 1 || true
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
