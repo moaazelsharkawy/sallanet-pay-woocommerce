@@ -1,0 +1,31 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read version
+        id: v
+        run: |
+          VERSION=$(grep -m1 -oP '^\s*\*\s*Version:\s*\K[0-9.]+' sallanet-pay/sallanet-pay.php)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Lint PHP
+        run: for f in $(find sallanet-pay -name '*.php'); do php -l "$f"; done
+      - name: Build zip
+        run: zip -qr "sallanet-pay-woocommerce-${{ steps.v.outputs.version }}.zip" sallanet-pay LICENSE
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.v.outputs.version }}
+          name: sallanet Pay for WooCommerce ${{ steps.v.outputs.version }}
+          files: sallanet-pay-woocommerce-${{ steps.v.outputs.version }}.zip
+          generate_release_notes: true
