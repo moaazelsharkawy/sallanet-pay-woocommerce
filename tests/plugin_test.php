@@ -76,11 +76,34 @@ hook(['event'=>'payment.success','transaction_id'=>$tx5,'status'=>'escrow','amou
 hook(['event'=>'payment.refunded','transaction_id'=>$tx5,'status'=>'refunded','amount'=>10,'currency'=>'pi','delivery_id'=>'g2']);
 check(wc_get_order($o5->get_id())->has_status('processing'), 'external partial refund only adds note');
 
-// 5. direct / fixed pricing
-$gw->update_option('pricing', 'fixed'); $gw->update_option('fixed_rate', '50'); 
-check($gw->to_coin(100, 'EGP') == 2.0, 'fixed rate 100 EGP / 50 = 2 Pi');
+// 5. pricing
+$gw->update_option('pricing', 'fixed'); $gw->update_option('fixed_rate', '50');
+check($gw->to_coin(100, 'USD') == 2.0, 'bare number applies to store currency (USD)');
+$gw->update_option('fixed_rate', "EGP=50\nusd: 1,5\nbad line");
+check($gw->to_coin(100, 'EGP') == 2.0 && $gw->to_coin(3, 'USD') == 2.0 && $gw->to_coin(1, 'EUR') == 0, 'per currency rates EGP=50 usd:1,5, unknown EUR refused');
 $gw->update_option('pricing', 'direct');
-check($gw->to_coin(3.3333333, 'PI') == 3.3333333 && $gw->to_coin(10, 'USD') == 0, 'direct pricing only for same coin');
-$gw->update_option('pricing', 'usd_live');
-check($gw->to_coin(10, 'EGP') == 0, 'usd_live refuses non USD');
+check($gw->to_coin(3.3333333, 'PI') == 3.3333333, 'order in PI never converted');
+check($gw->to_coin(100, 'EGP') == 2.0, 'fixed rate used in direct mode too');
+$gw->update_option('fixed_rate', ''); $gw->update_option('pricing', 'usd_live');
+check($gw->to_coin(10, 'EGP') == 0 && $gw->to_coin(1, 'USD') == 2.0, 'usd_live: USD live, EGP refused without rate');
+$gw->update_option('fixed_rate', 'EGP=25');
+check($gw->to_coin(50, 'EGP') == 2.0 && $gw->to_coin(1, 'USD') == 2.0, 'usd_live plus EGP fixed rate (currency switcher)');
+
+// 6. admin only fields
+set_current_screen('woocommerce_page_wc-settings');
+$mgr = wp_insert_user(['user_login'=>'mgr'.wp_rand(), 'user_pass'=>'x', 'role'=>'shop_manager']);
+wp_set_current_user($mgr);
+$g2 = new Sallanet_Pay_Gateway();
+$f = $g2->get_form_fields();
+check($f['api_key']['type'] === 'title' && $f['webhook_secret']['type'] === 'title', 'shop manager sees no key fields');
+ob_start(); $g2->admin_options(); $html = ob_get_clean();
+check(!str_contains($html, 'test_key') && !str_contains($html, 'whsec_test'), 'key and secret not in shop manager page');
+$_POST = ['woocommerce_sallanet_pay_enabled'=>'1', 'woocommerce_sallanet_pay_api_key'=>'hacked', 'woocommerce_sallanet_pay_title'=>'T2', 'woocommerce_sallanet_pay_coin'=>'pi', 'woocommerce_sallanet_pay_pricing'=>'usd_live'];
+$g2->process_admin_options();
+$saved = get_option('woocommerce_sallanet_pay_settings');
+check($saved['api_key'] === 'test_key' && $saved['webhook_secret'] === 'whsec_test' && $saved['title'] === 'T2', 'shop manager save keeps key and secret');
+wp_set_current_user(1);
+$g3 = new Sallanet_Pay_Gateway();
+check($g3->get_form_fields()['api_key']['type'] === 'password', 'administrator sees key field');
+$_POST = [];
 echo $fails ? "\n$fails FAILED\n" : "\nALL PASS\n";
