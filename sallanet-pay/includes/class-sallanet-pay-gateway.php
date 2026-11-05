@@ -23,15 +23,19 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 		$this->id                 = self::ID;
 		$this->method_title       = __( 'sallanet Pay', 'sallanet-pay' );
 		$this->method_description = __( 'Customers pay in Pi or ST on the secure sallanet Pay page, then return to your store. Payment is held in escrow until the buyer confirms or the hold period ends.', 'sallanet-pay' );
-		$this->has_fields         = false;
+		$this->has_fields         = true;
 		$this->supports           = array( 'products', 'refunds' );
-		$this->icon               = SALLANET_PAY_URL . 'assets/icon.svg';
+		$this->icon               = SALLANET_PAY_URL . 'assets/logo.png';
 
 		$this->init_form_fields();
 		$this->init_settings();
+		// Show the translated default in the settings form until the merchant writes their own.
+		foreach ( array( 'title', 'description' ) as $key ) {
+			$this->settings[ $key ] = $this->localized_option( $key );
+		}
 
-		$this->title       = $this->get_option( 'title' );
-		$this->description = $this->get_option( 'description' );
+		$this->title       = $this->localized_option( 'title' );
+		$this->description = $this->localized_option( 'description' );
 		$this->enabled     = $this->get_option( 'enabled' );
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -57,6 +61,11 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 				'type'    => 'textarea',
 				'default' => __( 'You will be taken to sallanet Pay to complete the payment securely.', 'sallanet-pay' ),
 			),
+			'section_connect'  => array(
+				'title'       => __( 'Connection', 'sallanet-pay' ),
+				'type'        => 'title',
+				'description' => __( 'Get these from your sallanet Pay developer dashboard.', 'sallanet-pay' ),
+			),
 			'api_key'          => array(
 				'title'       => __( 'API key', 'sallanet-pay' ),
 				'type'        => 'password',
@@ -72,12 +81,21 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 			'webhook_secret'   => array(
 				'title'       => __( 'Webhook secret', 'sallanet-pay' ),
 				'type'        => 'password',
-				'description' => sprintf(
-					/* translators: %s: webhook URL */
-					__( 'Set this webhook URL in your sallanet Pay dashboard: %s', 'sallanet-pay' ),
-					'<code>' . esc_html( rest_url( 'sallanet-pay/v1/webhook' ) ) . '</code>'
-				),
+				'description' => __( 'Paste the webhook secret from your sallanet Pay dashboard.', 'sallanet-pay' ),
 				'default'     => '',
+			),
+			'webhook_url'      => array(
+				'title' => __( 'Webhook URL', 'sallanet-pay' ),
+				'type'  => 'sallanet_info',
+			),
+			'test_connection'  => array(
+				'title' => __( 'Check connection', 'sallanet-pay' ),
+				'type'  => 'sallanet_info',
+			),
+			'section_pricing'  => array(
+				'title'       => __( 'Pricing', 'sallanet-pay' ),
+				'type'        => 'title',
+				'description' => __( 'How the order total is turned into coins.', 'sallanet-pay' ),
 			),
 			'coin'             => array(
 				'title'   => __( 'Charge in', 'sallanet-pay' ),
@@ -102,8 +120,19 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 			'fixed_rate'       => array(
 				'title'       => __( 'Fixed rates', 'sallanet-pay' ),
 				'type'        => 'textarea',
+				'css'         => 'direction:ltr;text-align:left;',
 				'description' => __( 'How many units of a currency equal 1 coin. One per line, like EGP=50 and USD=1.5. A number alone applies to the store currency. Add every currency your currency switcher plugin offers.', 'sallanet-pay' ),
 				'default'     => '',
+			),
+			'rate_preview'     => array(
+				'title' => __( 'Current rates', 'sallanet-pay' ),
+				'type'  => 'sallanet_info',
+			),
+			'section_advanced' => array(
+				'title'       => __( 'Advanced', 'sallanet-pay' ),
+				'type'        => 'title',
+				'class'       => 'sallanet-advanced-toggle',
+				'description' => __( 'Most stores do not need to change these.', 'sallanet-pay' ),
 			),
 			'release_on_complete' => array(
 				'title'       => __( 'Instant settlement', 'sallanet-pay' ),
@@ -191,7 +220,7 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Keys only administrators may see or change (shop managers cannot).
 	 */
-	const ADMIN_ONLY = array( 'api_key', 'webhook_secret', 'app_id', 'api_base' );
+	const ADMIN_ONLY = array( 'api_key', 'webhook_secret', 'app_id', 'api_base', 'webhook_url', 'test_connection' );
 
 	public function get_form_fields() {
 		$fields = parent::get_form_fields();
@@ -208,6 +237,217 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 			}
 		}
 		return $fields;
+	}
+
+	/**
+	 * Saved title or description, translated when it is still the English default.
+	 */
+	public function localized_option( $key ) {
+		$value    = (string) $this->get_option( $key );
+		$defaults = array(
+			'title'       => 'Pay with Pi (sallanet Pay)',
+			'description' => 'You will be taken to sallanet Pay to complete the payment securely.',
+		);
+		if ( isset( $defaults[ $key ] ) && ( '' === $value || $value === $defaults[ $key ] ) ) {
+			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+			return __( $defaults[ $key ], 'sallanet-pay' );
+		}
+		return $value;
+	}
+
+	public function get_icon() {
+		$icon = '<img src="' . esc_url( $this->icon ) . '" alt="sallanet Pay" class="sallanet-pay-icon" style="width:36px;height:36px;max-height:36px;border-radius:9px;vertical-align:middle;margin-inline-start:8px;float:none;" />';
+		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
+	}
+
+	/**
+	 * "About 41.48 Pi" for a total, or '' when it cannot be priced.
+	 */
+	public function coin_preview( $total, $currency ) {
+		$coins = $this->to_coin( $total, $currency );
+		if ( $coins <= 0 ) {
+			return '';
+		}
+		/* translators: %s: amount with coin, like 41.48 Pi */
+		return sprintf( __( 'About %s', 'sallanet-pay' ), $this->coin_amount_text( $coins ) );
+	}
+
+	public function coin_amount_text( $coins ) {
+		return wc_format_decimal( $coins, 4, true ) . ' ' . ( 'st' === $this->coin() ? 'ST' : 'Pi' );
+	}
+
+	/**
+	 * Same as coin_preview but HTML, with the amount kept left to right inside Arabic text.
+	 */
+	public function coin_preview_html( $total, $currency ) {
+		$coins = $this->to_coin( $total, $currency );
+		if ( $coins <= 0 ) {
+			return '';
+		}
+		/* translators: %s: amount with coin, like 41.48 Pi */
+		$parts = explode( '%s', __( 'About %s', 'sallanet-pay' ), 2 );
+		return esc_html( $parts[0] ) . '<bdi dir="ltr">' . esc_html( $this->coin_amount_text( $coins ) ) . '</bdi>' . esc_html( $parts[1] ?? '' );
+	}
+
+	public function escrow_note() {
+		return __( 'Your payment is protected in escrow until you receive your order.', 'sallanet-pay' );
+	}
+
+	/**
+	 * Conversion data for the block checkout, so the amount updates with the cart.
+	 */
+	public function conversion_data() {
+		$usd = 0.0;
+		if ( 'usd_live' === $this->get_option( 'pricing' ) && 'pi' === $this->coin() ) {
+			$usd = $this->api()->pi_usd_price();
+		}
+		return array(
+			'coin'     => $this->coin(),
+			'rates'    => (object) $this->fixed_rates(),
+			'usdPrice' => $usd,
+		);
+	}
+
+	public function payment_fields() {
+		echo '<div class="sallanet-pay-box" style="display:flex;flex-direction:column;gap:6px;">';
+		if ( $this->description ) {
+			echo '<div>' . wp_kses_post( wpautop( wptexturize( $this->description ) ) ) . '</div>';
+		}
+		if ( function_exists( 'WC' ) && WC()->cart ) {
+			$preview = $this->coin_preview_html( WC()->cart->get_total( 'edit' ), get_woocommerce_currency() );
+			if ( $preview ) {
+				echo '<strong class="sallanet-pay-amount" style="font-size:1.1em;">' . $preview . '</strong>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in coin_preview_html.
+			}
+		}
+		echo '<small class="sallanet-pay-escrow" style="opacity:.75;">' . esc_html( $this->escrow_note() ) . '</small>';
+		echo '</div>';
+	}
+
+	public function validate_sallanet_info_field( $key, $value ) {
+		return '';
+	}
+
+	/**
+	 * Read-only rows: webhook URL with copy button, connection check, rate preview.
+	 */
+	public function generate_sallanet_info_html( $key, $data ) {
+		$field_key = $this->get_field_key( $key );
+		$inner     = '';
+		if ( 'webhook_url' === $key ) {
+			$url   = rest_url( 'sallanet-pay/v1/webhook' );
+			$inner = '<code id="sallanet-webhook-url" style="direction:ltr;display:inline-block;padding:6px 8px;word-break:break-all;">' . esc_html( $url ) . '</code> '
+				. '<button type="button" class="button" data-sallanet-copy="' . esc_attr( $url ) . '">' . esc_html__( 'Copy', 'sallanet-pay' ) . '</button>'
+				. '<p class="description">' . esc_html__( 'Put this URL in your sallanet Pay developer dashboard.', 'sallanet-pay' ) . '</p>';
+		} elseif ( 'test_connection' === $key ) {
+			$inner = '<button type="button" class="button" id="sallanet-test-connection">' . esc_html__( 'Check connection', 'sallanet-pay' ) . '</button> '
+				. '<span id="sallanet-test-result" style="margin-inline-start:8px;"></span>'
+				. '<p class="description">' . esc_html__( 'Checks the saved API key with sallanet Pay. Save your changes first.', 'sallanet-pay' ) . '</p>';
+		} elseif ( 'rate_preview' === $key ) {
+			$lines = array();
+			$coin  = 'st' === $this->coin() ? 'ST' : 'Pi';
+			$bdi   = function ( $text ) {
+				return '<bdi dir="ltr">' . esc_html( $text ) . '</bdi>';
+			};
+			foreach ( $this->fixed_rates() as $code => $rate ) {
+				$lines[] = $bdi( '1 ' . $coin . ' = ' . wc_format_decimal( $rate, 4, true ) . ' ' . $code );
+			}
+			if ( 'usd_live' === $this->get_option( 'pricing' ) && 'Pi' === $coin ) {
+				$price   = $this->api()->pi_usd_price();
+				$lines[] = $price > 0
+					/* translators: %s: live price, like 1 Pi = 0.5 USD */
+					? sprintf( esc_html__( 'Live price %s', 'sallanet-pay' ), $bdi( '1 Pi = ' . wc_format_decimal( $price, 4, true ) . ' USD' ) )
+					: esc_html__( 'Live Pi price is not available right now.', 'sallanet-pay' );
+			}
+			$store = get_woocommerce_currency();
+			$check = $this->coin_preview_html( 100, $store );
+			$lines[] = $check
+				/* translators: 1: amount in store currency, like 100 USD, 2: amount in coins */
+				? sprintf( esc_html__( '%1$s in your store currency is %2$s.', 'sallanet-pay' ), $bdi( '100 ' . $store ), $check )
+				/* translators: %s: store currency */
+				: sprintf( esc_html__( 'Your store currency %s has no rate yet. Buyers cannot pay with sallanet Pay until you add one.', 'sallanet-pay' ), $bdi( $store ) );
+			$inner = '<div style="line-height:1.9;">' . implode( '<br>', $lines ) . '</div>';
+		}
+		ob_start();
+		?>
+		<tr valign="top">
+			<th scope="row" class="titledesc"><label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label></th>
+			<td class="forminp"><?php echo $inner; // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
+		</tr>
+		<?php
+		return ob_get_clean();
+	}
+
+	public function admin_options() {
+		parent::admin_options();
+		$nonce = wp_create_nonce( 'sallanet_pay_test' );
+		$texts = array(
+			'copied'   => __( 'Copied', 'sallanet-pay' ),
+			'checking' => __( 'Checking', 'sallanet-pay' ),
+			'failed'   => __( 'Could not reach the site. Try again.', 'sallanet-pay' ),
+		);
+		?>
+		<script>
+		( function () {
+			var t = <?php echo wp_json_encode( $texts ); ?>;
+			document.querySelectorAll( '[data-sallanet-copy]' ).forEach( function ( b ) {
+				b.addEventListener( 'click', function () {
+					var v = b.getAttribute( 'data-sallanet-copy' );
+					( navigator.clipboard ? navigator.clipboard.writeText( v ) : Promise.reject() ).then( function () { b.textContent = t.copied; } ).catch( function () { window.prompt( '', v ); } );
+				} );
+			} );
+			var btn = document.getElementById( 'sallanet-test-connection' );
+			var out = document.getElementById( 'sallanet-test-result' );
+			if ( btn && out ) {
+				btn.addEventListener( 'click', function () {
+					out.textContent = t.checking;
+					var body = new FormData();
+					body.append( 'action', 'sallanet_pay_test_connection' );
+					body.append( '_wpnonce', <?php echo wp_json_encode( $nonce ); ?> );
+					fetch( <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>, { method: 'POST', body: body, credentials: 'same-origin' } )
+						.then( function ( r ) { return r.json(); } )
+						.then( function ( r ) { out.textContent = r && r.data ? r.data.message : t.failed; out.style.color = r && r.success ? '#1a7f37' : '#b42318'; } )
+						.catch( function () { out.textContent = t.failed; out.style.color = '#b42318'; } );
+				} );
+			}
+			// Advanced section starts folded.
+			var adv = document.querySelector( 'h3.sallanet-advanced-toggle, h2.sallanet-advanced-toggle, .sallanet-advanced-toggle' );
+			if ( adv ) {
+				var table = adv.nextElementSibling;
+				while ( table && table.tagName !== 'TABLE' ) { table = table.nextElementSibling; }
+				if ( table ) {
+					table.style.display = 'none';
+					adv.style.cursor = 'pointer';
+					adv.insertAdjacentHTML( 'beforeend', ' <span aria-hidden="true">&#9662;</span>' );
+					adv.addEventListener( 'click', function () { table.style.display = table.style.display === 'none' ? '' : 'none'; } );
+				}
+			}
+		} )();
+		</script>
+		<?php
+	}
+
+	/**
+	 * Admin "Check connection": a status lookup for a random id answers 404 when the key works.
+	 */
+	public static function ajax_test_connection() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_ajax_referer( 'sallanet_pay_test', '_wpnonce', false ) ) {
+			wp_send_json_error( array( 'message' => __( 'Not allowed.', 'sallanet-pay' ) ), 403 );
+		}
+		$gateway = new self();
+		if ( '' === trim( (string) $gateway->get_option( 'api_key' ) ) ) {
+			wp_send_json_error( array( 'message' => __( 'Add and save the API key first.', 'sallanet-pay' ) ) );
+		}
+		$result = $gateway->api()->transaction_status( wp_generate_uuid4() );
+		if ( 404 === $result['status'] ) {
+			wp_send_json_success( array( 'message' => __( 'Connected. The API key works.', 'sallanet-pay' ) ) );
+		}
+		if ( 401 === $result['status'] ) {
+			wp_send_json_error( array( 'message' => __( 'The API key is wrong or expired.', 'sallanet-pay' ) ) );
+		}
+		if ( 429 === $result['status'] ) {
+			wp_send_json_error( array( 'message' => __( 'Too many requests. Wait a minute and try again.', 'sallanet-pay' ) ) );
+		}
+		wp_send_json_error( array( 'message' => __( 'Could not reach sallanet Pay. Try again later.', 'sallanet-pay' ) ) );
 	}
 
 	public function process_payment( $order_id ) {

@@ -3,7 +3,7 @@
  * Plugin Name: sallanet Pay for WooCommerce
  * Plugin URI: https://github.com/moaazelsharkawy/sallanet-pay-woocommerce
  * Description: Accept Pi and ST payments in WooCommerce through sallanet Pay (hosted checkout, signed webhooks, refunds).
- * Version: 0.2.1
+ * Version: 0.3.0
  * Author: sallanet
  * Requires at least: 6.2
  * Requires PHP: 7.4
@@ -11,6 +11,7 @@
  * WC requires at least: 8.0
  * WC tested up to: 10.3
  * Text Domain: sallanet-pay
+ * Domain Path: /languages
  * License: GPLv2 or later
  */
 
@@ -18,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SALLANET_PAY_VERSION', '0.2.1' );
+define( 'SALLANET_PAY_VERSION', '0.3.0' );
 define( 'SALLANET_PAY_FILE', __FILE__ );
 define( 'SALLANET_PAY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SALLANET_PAY_URL', plugin_dir_url( __FILE__ ) );
@@ -31,6 +32,13 @@ add_action(
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
 		}
+	}
+);
+
+add_action(
+	'init',
+	function () {
+		load_plugin_textdomain( 'sallanet-pay', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 	}
 );
 
@@ -53,6 +61,7 @@ add_action(
 		);
 
 		Sallanet_Pay_Webhook::init();
+		add_action( 'wp_ajax_sallanet_pay_test_connection', array( 'Sallanet_Pay_Gateway', 'ajax_test_connection' ) );
 	}
 );
 

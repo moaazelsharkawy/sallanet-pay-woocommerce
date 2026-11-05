@@ -1,0 +1,225 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ar\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5);\n"
+
+msgid "About %s"
+msgstr "حوالي %s"
+
+msgid "sallanet Pay"
+msgstr "سلة باي"
+
+msgid "Customers pay in Pi or ST on the secure sallanet Pay page, then return to your store. Payment is held in escrow until the buyer confirms or the hold period ends."
+msgstr "المشتري يدفع بعملة Pi او ST في صفحة الدفع الامنة في سلة باي ثم يرجع للمتجر. المبلغ يبقى في الضمان حتى يؤكد المشتري الاستلام او تنتهي مدة الضمان."
+
+msgid "Enable"
+msgstr "تفعيل"
+
+msgid "Enable sallanet Pay"
+msgstr "تفعيل الدفع عبر سلة باي"
+
+msgid "Title"
+msgstr "الاسم"
+
+msgid "Pay with Pi (sallanet Pay)"
+msgstr "ادفع بعملة Pi عبر سلة باي"
+
+msgid "Description"
+msgstr "الوصف"
+
+msgid "You will be taken to sallanet Pay to complete the payment securely."
+msgstr "سيتم نقلك الى سلة باي لاتمام الدفع بامان."
+
+msgid "Connection"
+msgstr "الربط"
+
+msgid "Get these from your sallanet Pay developer dashboard."
+msgstr "تجدها في حساب المطور في سلة باي."
+
+msgid "API key"
+msgstr "مفتاح API"
+
+msgid "From your sallanet Pay developer dashboard. It is shown only once when created."
+msgstr "من حساب المطور في سلة باي. يظهر مرة واحدة فقط عند انشائه."
+
+msgid "App ID (optional)"
+msgstr "معرف التطبيق اختياري"
+
+msgid "Needed only if your key has more than one linked app."
+msgstr "مطلوب فقط لو المفتاح مربوط باكثر من تطبيق."
+
+msgid "Webhook secret"
+msgstr "سر الويب هوك"
+
+msgid "Paste the webhook secret from your sallanet Pay dashboard."
+msgstr "الصق سر الويب هوك من حسابك في سلة باي."
+
+msgid "Webhook URL"
+msgstr "رابط الويب هوك"
+
+msgid "Check connection"
+msgstr "فحص الاتصال"
+
+msgid "Pricing"
+msgstr "التسعير"
+
+msgid "How the order total is turned into coins."
+msgstr "طريقة تحويل اجمالي الطلب الى عملة."
+
+msgid "Charge in"
+msgstr "الدفع بعملة"
+
+msgid "Price conversion"
+msgstr "تحويل السعر"
+
+msgid "Prices are already in the coin (store currency PI or ST)"
+msgstr "الاسعار بالعملة نفسها وعملة المتجر Pi او ST"
+
+msgid "USD prices, convert with the live Pi price"
+msgstr "الاسعار بالدولار مع سعر Pi اللحظي"
+
+msgid "Fixed rates only (set below)"
+msgstr "اسعار ثابتة فقط من الحقل التالي"
+
+msgid "How the order total is turned into coins. An order already in PI or ST is never converted. Any currency listed in Fixed rates uses that rate."
+msgstr "طريقة تحويل اجمالي الطلب الى عملة. الطلب المسعر بعملة Pi او ST لا يتم تحويله. واي عملة مكتوبة في الاسعار الثابتة تستخدم سعرها."
+
+msgid "Fixed rates"
+msgstr "الاسعار الثابتة"
+
+msgid "How many units of a currency equal 1 coin. One per line, like EGP=50 and USD=1.5. A number alone applies to the store currency. Add every currency your currency switcher plugin offers."
+msgstr "كم وحدة من العملة تساوي عملة واحدة. كل عملة في سطر مثل EGP=50 و USD=1.5. الرقم وحده يطبق على عملة المتجر. اضف كل عملة موجودة في اضافة تعدد العملات."
+
+msgid "Current rates"
+msgstr "الاسعار الحالية"
+
+msgid "Advanced"
+msgstr "متقدم"
+
+msgid "Most stores do not need to change these."
+msgstr "اغلب المتاجر لا تحتاج تغيير هذه الاعدادات."
+
+msgid "Instant settlement"
+msgstr "التحرير الفوري"
+
+msgid "Release escrow when the order is marked Completed"
+msgstr "تحرير المبلغ من الضمان عند تحويل الطلب الى مكتمل"
+
+msgid "Only for verified digital stores that have instant settlement enabled by sallanet."
+msgstr "فقط للمتاجر الرقمية الموثقة التي فعلت لها سلة باي التحرير الفوري."
+
+msgid "API base URL"
+msgstr "رابط API الاساسي"
+
+msgid "Leave empty unless told otherwise."
+msgstr "اتركه فارغا الا اذا طلب منك غير ذلك."
+
+msgid "Only site administrators can see or change this."
+msgstr "مدير الموقع فقط يمكنه رؤية وتغيير هذا الحقل."
+
+msgid "Your payment is protected in escrow until you receive your order."
+msgstr "مبلغك محمي في الضمان حتى تستلم طلبك."
+
+msgid "Copy"
+msgstr "نسخ"
+
+msgid "Put this URL in your sallanet Pay developer dashboard."
+msgstr "ضع هذا الرابط في حساب المطور في سلة باي."
+
+msgid "Checks the saved API key with sallanet Pay. Save your changes first."
+msgstr "يفحص مفتاح API المحفوظ مع سلة باي. احفظ التغييرات اولا."
+
+msgid "Live price %s"
+msgstr "السعر اللحظي %s"
+
+msgid "Live Pi price is not available right now."
+msgstr "سعر Pi اللحظي غير متاح الان."
+
+msgid "%1$s in your store currency is %2$s."
+msgstr "%1$s بعملة متجرك تساوي %2$s."
+
+msgid "Your store currency %s has no rate yet. Buyers cannot pay with sallanet Pay until you add one."
+msgstr "عملة متجرك %s ليس لها سعر بعد. لن يتمكن المشترون من الدفع بسلة باي حتى تضيف سعرها."
+
+msgid "Copied"
+msgstr "تم النسخ"
+
+msgid "Checking"
+msgstr "جار الفحص"
+
+msgid "Could not reach the site. Try again."
+msgstr "تعذر الوصول للموقع. حاول مرة اخرى."
+
+msgid "Not allowed."
+msgstr "غير مسموح."
+
+msgid "Add and save the API key first."
+msgstr "اضف مفتاح API واحفظه اولا."
+
+msgid "Connected. The API key works."
+msgstr "تم الاتصال. مفتاح API يعمل."
+
+msgid "The API key is wrong or expired."
+msgstr "مفتاح API غير صحيح او منتهي."
+
+msgid "Too many requests. Wait a minute and try again."
+msgstr "طلبات كثيرة. انتظر دقيقة وحاول مرة اخرى."
+
+msgid "Could not reach sallanet Pay. Try again later."
+msgstr "تعذر الوصول الى سلة باي. حاول لاحقا."
+
+msgid "This payment method cannot price this order right now. Please try again or choose another method."
+msgstr "طريقة الدفع هذه لا يمكنها تسعير الطلب الان. حاول مرة اخرى او اختر طريقة دفع اخرى."
+
+msgid "sallanet Pay: could not convert the order total. Check the price conversion settings."
+msgstr "سلة باي تعذر تحويل اجمالي الطلب. راجع اعدادات تحويل السعر."
+
+msgid "Order #%1$s at %2$s"
+msgstr "طلب رقم %1$s في %2$s"
+
+msgid "Could not start the payment. Please try again in a moment."
+msgstr "تعذر بدء الدفع. حاول مرة اخرى بعد قليل."
+
+msgid "sallanet Pay checkout created for %1$s %2$s (transaction %3$s). Waiting for payment."
+msgstr "سلة باي تم انشاء جلسة دفع بمبلغ %1$s %2$s برقم عملية %3$s. في انتظار الدفع."
+
+msgid "sallanet Pay: payment of %1$s %2$s received and held in escrow (%3$s)."
+msgstr "سلة باي تم استلام %1$s %2$s والمبلغ في الضمان عن طريق %3$s."
+
+msgid "sallanet Pay: escrow released to your balance."
+msgstr "سلة باي تم تحرير المبلغ من الضمان الى رصيدك."
+
+msgid "Order not found."
+msgstr "الطلب غير موجود."
+
+msgid "This order has no sallanet Pay transaction."
+msgstr "هذا الطلب ليس له عملية في سلة باي."
+
+msgid "Refund amount must be more than zero."
+msgstr "مبلغ الاسترداد لازم يكون اكبر من صفر."
+
+msgid "sallanet Pay allows one refund per order and this order was already refunded."
+msgstr "سلة باي تسمح باسترداد واحد لكل طلب وهذا الطلب تم استرداده من قبل."
+
+msgid "Refund amount is too small."
+msgstr "مبلغ الاسترداد صغير جدا."
+
+msgid "sallanet Pay: refunded %1$s %2$s to the buyer. %3$s"
+msgstr "سلة باي تم رد %1$s %2$s للمشتري. %3$s"
+
+msgid "sallanet Pay: refund of %1$s %2$s confirmed."
+msgstr "سلة باي تم تاكيد استرداد %1$s %2$s."
+
+msgid "Refunded from sallanet Pay."
+msgstr "تم الاسترداد من سلة باي."
+
+msgid "Pi"
+msgstr "Pi"
+
+msgid "ST (Salla Token)"
+msgstr "ST عملة سلة"
+
+msgid "Settings"
+msgstr "الاعدادات"
+

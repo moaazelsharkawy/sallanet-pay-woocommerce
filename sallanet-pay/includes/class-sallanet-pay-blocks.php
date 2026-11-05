@@ -39,9 +39,13 @@ final class Sallanet_Pay_Blocks extends AbstractPaymentMethodType {
 
 	public function get_payment_method_data() {
 		return array(
-			'title'       => $this->get_setting( 'title' ),
-			'description' => $this->get_setting( 'description' ),
-			'icon'        => SALLANET_PAY_URL . 'assets/icon.svg',
+			'title'       => $this->gateway ? $this->gateway->localized_option( 'title' ) : $this->get_setting( 'title' ),
+			'description' => $this->gateway ? $this->gateway->localized_option( 'description' ) : $this->get_setting( 'description' ),
+			'icon'        => SALLANET_PAY_URL . 'assets/logo.png',
+			'conversion'  => $this->gateway ? $this->gateway->conversion_data() : null,
+			/* translators: %s: amount with coin, like 41.48 Pi */
+			'aboutText'   => __( 'About %s', 'sallanet-pay' ),
+			'escrowText'  => $this->gateway ? $this->gateway->escrow_note() : '',
 			'supports'    => $this->gateway ? array_values( array_filter( $this->gateway->supports, array( $this->gateway, 'supports' ) ) ) : array( 'products' ),
 		);
 	}
