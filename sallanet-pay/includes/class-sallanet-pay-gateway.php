@@ -92,17 +92,17 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 				'title'       => __( 'Price conversion', 'sallanet-pay' ),
 				'type'        => 'select',
 				'options'     => array(
-					'direct'   => __( 'Store currency is the same coin (PI or ST)', 'sallanet-pay' ),
-					'usd_live' => __( 'Store currency is USD, convert with live Pi price', 'sallanet-pay' ),
-					'fixed'    => __( 'Fixed rate (set below)', 'sallanet-pay' ),
+					'direct'   => __( 'Prices are already in the coin (store currency PI or ST)', 'sallanet-pay' ),
+					'usd_live' => __( 'USD prices, convert with the live Pi price', 'sallanet-pay' ),
+					'fixed'    => __( 'Fixed rates only (set below)', 'sallanet-pay' ),
 				),
 				'default'     => 'direct',
-				'description' => __( 'Live conversion works for Pi with a USD store. For other currencies use a fixed rate.', 'sallanet-pay' ),
+				'description' => __( 'How the order total is turned into coins. An order already in PI or ST is never converted. Any currency listed in Fixed rates uses that rate.', 'sallanet-pay' ),
 			),
 			'fixed_rate'       => array(
-				'title'       => __( 'Fixed rate', 'sallanet-pay' ),
-				'type'        => 'text',
-				'description' => __( 'How many units of your store currency equal 1 coin. Example: 50 means 1 Pi = 50 of your currency.', 'sallanet-pay' ),
+				'title'       => __( 'Fixed rates', 'sallanet-pay' ),
+				'type'        => 'textarea',
+				'description' => __( 'How many units of a currency equal 1 coin. One per line, like EGP=50 and USD=1.5. A number alone applies to the store currency. Add every currency your currency switcher plugin offers.', 'sallanet-pay' ),
 				'default'     => '',
 			),
 			'release_on_complete' => array(
@@ -137,32 +137,77 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Converts a store-currency amount to coins. Returns 0 when it cannot.
+	 * Fixed rates as CODE => rate. A bare number is keyed to the store base currency.
 	 */
-	public function to_coin( $amount, $store_currency ) {
-		$amount  = (float) $amount;
-		$pricing = $this->get_option( 'pricing' );
-		$coin    = $this->coin();
-		$coins   = 0.0;
-		if ( 'direct' === $pricing ) {
-			if ( strtolower( (string) $store_currency ) === $coin ) {
-				$coins = $amount;
+	public function fixed_rates() {
+		$rates = array();
+		$parts = preg_split( '/[\r\n;]+/', (string) $this->get_option( 'fixed_rate' ) );
+		foreach ( $parts as $part ) {
+			$part = trim( $part );
+			if ( '' === $part ) {
+				continue;
 			}
-		} elseif ( 'usd_live' === $pricing ) {
-			if ( 'pi' === $coin && 'USD' === strtoupper( (string) $store_currency ) ) {
-				$price = $this->api()->pi_usd_price();
-				if ( $price > 0 ) {
-					$coins = $amount / $price;
-				}
+			if ( preg_match( '/^([A-Za-z]{2,5})\s*[=:]\s*([0-9]+(?:[.,][0-9]+)?)$/', $part, $m ) ) {
+				$code = strtoupper( $m[1] );
+				$rate = (float) str_replace( ',', '.', $m[2] );
+			} elseif ( preg_match( '/^[0-9]+(?:[.,][0-9]+)?$/', $part ) ) {
+				$code = strtoupper( get_option( 'woocommerce_currency' ) );
+				$rate = (float) str_replace( ',', '.', $part );
+			} else {
+				continue;
 			}
-		} elseif ( 'fixed' === $pricing ) {
-			$rate = (float) str_replace( ',', '.', (string) $this->get_option( 'fixed_rate' ) );
 			if ( $rate > 0 ) {
-				$coins = $amount / $rate;
+				$rates[ $code ] = $rate;
+			}
+		}
+		return $rates;
+	}
+
+	/**
+	 * Converts an amount in the order currency to coins. Returns 0 when it cannot.
+	 * Uses the order currency, so currency switcher plugins work when each of
+	 * their currencies has a fixed rate (or is USD with live pricing).
+	 */
+	public function to_coin( $amount, $currency ) {
+		$amount   = (float) $amount;
+		$currency = strtoupper( (string) $currency );
+		$coin     = $this->coin();
+		$rates    = $this->fixed_rates();
+		$coins    = 0.0;
+		if ( strtoupper( $coin ) === $currency ) {
+			$coins = $amount;
+		} elseif ( isset( $rates[ $currency ] ) ) {
+			$coins = $amount / $rates[ $currency ];
+		} elseif ( 'usd_live' === $this->get_option( 'pricing' ) && 'pi' === $coin && 'USD' === $currency ) {
+			$price = $this->api()->pi_usd_price();
+			if ( $price > 0 ) {
+				$coins = $amount / $price;
 			}
 		}
 		// The API accepts at most 7 decimals; round up so the store never gets less.
 		return $coins > 0 ? ceil( $coins * 1e7 - 1e-6 ) / 1e7 : 0.0;
+	}
+
+	/**
+	 * Keys only administrators may see or change (shop managers cannot).
+	 */
+	const ADMIN_ONLY = array( 'api_key', 'webhook_secret', 'app_id', 'api_base' );
+
+	public function get_form_fields() {
+		$fields = parent::get_form_fields();
+		if ( is_admin() && did_action( 'init' ) && ! current_user_can( 'manage_options' ) ) {
+			foreach ( self::ADMIN_ONLY as $key ) {
+				if ( isset( $fields[ $key ] ) ) {
+					// 'title' fields are display only and are never saved, so the stored value stays.
+					$fields[ $key ] = array(
+						'title'       => $fields[ $key ]['title'],
+						'type'        => 'title',
+						'description' => __( 'Only site administrators can see or change this.', 'sallanet-pay' ),
+					);
+				}
+			}
+		}
+		return $fields;
 	}
 
 	public function process_payment( $order_id ) {
