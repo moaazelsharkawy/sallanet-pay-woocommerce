@@ -13,26 +13,8 @@ msgstr "سلة باي"
 msgid "Customers pay in Pi or ST on the secure sallanet Pay page, then return to your store. Payment is held in escrow until the buyer confirms or the hold period ends."
 msgstr "المشتري يدفع بعملة Pi او ST في صفحة الدفع الامنة في سلة باي ثم يرجع للمتجر. المبلغ يبقى في الضمان حتى يؤكد المشتري الاستلام او تنتهي مدة الضمان."
 
-msgid "Enable"
-msgstr "تفعيل"
-
-msgid "Enable sallanet Pay"
-msgstr "تفعيل الدفع عبر سلة باي"
-
-msgid "Title"
-msgstr "الاسم"
-
-msgid "Pay with Pi (sallanet Pay)"
-msgstr "ادفع بعملة Pi عبر سلة باي"
-
-msgid "Description"
-msgstr "الوصف"
-
-msgid "You will be taken to sallanet Pay to complete the payment securely."
-msgstr "سيتم نقلك الى سلة باي لاتمام الدفع بامان."
-
-msgid "Connection"
-msgstr "الربط"
+msgid "Connect your account"
+msgstr "اربط حسابك"
 
 msgid "Get these from your sallanet Pay developer dashboard."
 msgstr "تجدها في حساب المطور في سلة باي."
@@ -49,20 +31,26 @@ msgstr "معرف التطبيق اختياري"
 msgid "Needed only if your key has more than one linked app."
 msgstr "مطلوب فقط لو المفتاح مربوط باكثر من تطبيق."
 
+msgid "Check connection"
+msgstr "فحص الاتصال"
+
+msgid "Link the webhook"
+msgstr "اربط الويب هوك"
+
+msgid "sallanet Pay tells your store when a payment arrives or is refunded."
+msgstr "سلة باي تبلغ متجرك عند وصول دفعة او استردادها."
+
+msgid "Webhook URL"
+msgstr "رابط الويب هوك"
+
 msgid "Webhook secret"
 msgstr "سر الويب هوك"
 
 msgid "Paste the webhook secret from your sallanet Pay dashboard."
 msgstr "الصق سر الويب هوك من حسابك في سلة باي."
 
-msgid "Webhook URL"
-msgstr "رابط الويب هوك"
-
-msgid "Check connection"
-msgstr "فحص الاتصال"
-
-msgid "Pricing"
-msgstr "التسعير"
+msgid "Set pricing"
+msgstr "جهز التسعير"
 
 msgid "How the order total is turned into coins."
 msgstr "طريقة تحويل اجمالي الطلب الى عملة."
@@ -94,6 +82,30 @@ msgstr "كم وحدة من العملة تساوي عملة واحدة. كل ع�
 msgid "Current rates"
 msgstr "الاسعار الحالية"
 
+msgid "Show it to buyers"
+msgstr "اعرضها للمشترين"
+
+msgid "What buyers see at checkout."
+msgstr "ما يراه المشتري في صفحة الدفع."
+
+msgid "Enable"
+msgstr "تفعيل"
+
+msgid "Enable sallanet Pay"
+msgstr "تفعيل الدفع عبر سلة باي"
+
+msgid "Title"
+msgstr "الاسم"
+
+msgid "Pay with Pi (sallanet Pay)"
+msgstr "ادفع بعملة Pi عبر سلة باي"
+
+msgid "Description"
+msgstr "الوصف"
+
+msgid "You will be taken to sallanet Pay to complete the payment securely."
+msgstr "سيتم نقلك الى سلة باي لاتمام الدفع بامان."
+
 msgid "Advanced"
 msgstr "متقدم"
 
@@ -114,6 +126,42 @@ msgstr "رابط API الاساسي"
 
 msgid "Leave empty unless told otherwise."
 msgstr "اتركه فارغا الا اذا طلب منك غير ذلك."
+
+msgid "Save the API key"
+msgstr "احفظ مفتاح API"
+
+msgid "Paste the API key from your sallanet Pay developer dashboard and save."
+msgstr "الصق مفتاح API من حساب المطور في سلة باي واحفظ."
+
+msgid "Copy the webhook URL to your dashboard and paste the webhook secret here."
+msgstr "انسخ رابط الويب هوك لحسابك في سلة باي والصق سر الويب هوك هنا."
+
+msgid "Check the connection"
+msgstr "افحص الاتصال"
+
+msgid "Press Check connection after saving."
+msgstr "اضغط فحص الاتصال بعد الحفظ."
+
+msgid "Prepare pricing"
+msgstr "جهز التسعير"
+
+msgid "Add a rate for your store currency or use Pi as the store currency."
+msgstr "اضف سعرا لعملة متجرك او اجعل عملة المتجر Pi."
+
+msgid "Turn it on for buyers"
+msgstr "فعلها للمشترين"
+
+msgid "Tick Enable and save."
+msgstr "علم على تفعيل واحفظ."
+
+msgid "Setup progress"
+msgstr "خطوات التجهيز"
+
+msgid "%1$d of %2$d steps done"
+msgstr "تم %1$d من %2$d خطوات"
+
+msgid "All set. Buyers can pay with sallanet Pay."
+msgstr "كل شيء جاهز. المشترون يمكنهم الدفع بسلة باي."
 
 msgid "Only site administrators can see or change this."
 msgstr "مدير الموقع فقط يمكنه رؤية وتغيير هذا الحقل."

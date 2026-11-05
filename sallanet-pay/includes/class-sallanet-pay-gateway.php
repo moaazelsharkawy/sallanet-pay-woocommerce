@@ -45,25 +45,10 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 
 	public function init_form_fields() {
 		$this->form_fields = array(
-			'enabled'          => array(
-				'title'   => __( 'Enable', 'sallanet-pay' ),
-				'type'    => 'checkbox',
-				'label'   => __( 'Enable sallanet Pay', 'sallanet-pay' ),
-				'default' => 'no',
-			),
-			'title'            => array(
-				'title'   => __( 'Title', 'sallanet-pay' ),
-				'type'    => 'text',
-				'default' => __( 'Pay with Pi (sallanet Pay)', 'sallanet-pay' ),
-			),
-			'description'      => array(
-				'title'   => __( 'Description', 'sallanet-pay' ),
-				'type'    => 'textarea',
-				'default' => __( 'You will be taken to sallanet Pay to complete the payment securely.', 'sallanet-pay' ),
-			),
 			'section_connect'  => array(
-				'title'       => __( 'Connection', 'sallanet-pay' ),
+				'title'       => __( 'Connect your account', 'sallanet-pay' ),
 				'type'        => 'title',
+				'class'       => 'sallanet-step',
 				'description' => __( 'Get these from your sallanet Pay developer dashboard.', 'sallanet-pay' ),
 			),
 			'api_key'          => array(
@@ -78,23 +63,30 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 				'description' => __( 'Needed only if your key has more than one linked app.', 'sallanet-pay' ),
 				'default'     => '',
 			),
+			'test_connection'  => array(
+				'title' => __( 'Check connection', 'sallanet-pay' ),
+				'type'  => 'sallanet_info',
+			),
+			'section_webhook'  => array(
+				'title'       => __( 'Link the webhook', 'sallanet-pay' ),
+				'type'        => 'title',
+				'class'       => 'sallanet-step',
+				'description' => __( 'sallanet Pay tells your store when a payment arrives or is refunded.', 'sallanet-pay' ),
+			),
+			'webhook_url'      => array(
+				'title' => __( 'Webhook URL', 'sallanet-pay' ),
+				'type'  => 'sallanet_info',
+			),
 			'webhook_secret'   => array(
 				'title'       => __( 'Webhook secret', 'sallanet-pay' ),
 				'type'        => 'password',
 				'description' => __( 'Paste the webhook secret from your sallanet Pay dashboard.', 'sallanet-pay' ),
 				'default'     => '',
 			),
-			'webhook_url'      => array(
-				'title' => __( 'Webhook URL', 'sallanet-pay' ),
-				'type'  => 'sallanet_info',
-			),
-			'test_connection'  => array(
-				'title' => __( 'Check connection', 'sallanet-pay' ),
-				'type'  => 'sallanet_info',
-			),
 			'section_pricing'  => array(
-				'title'       => __( 'Pricing', 'sallanet-pay' ),
+				'title'       => __( 'Set pricing', 'sallanet-pay' ),
 				'type'        => 'title',
+				'class'       => 'sallanet-step',
 				'description' => __( 'How the order total is turned into coins.', 'sallanet-pay' ),
 			),
 			'coin'             => array(
@@ -128,6 +120,28 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 				'title' => __( 'Current rates', 'sallanet-pay' ),
 				'type'  => 'sallanet_info',
 			),
+			'section_display'  => array(
+				'title'       => __( 'Show it to buyers', 'sallanet-pay' ),
+				'type'        => 'title',
+				'class'       => 'sallanet-step',
+				'description' => __( 'What buyers see at checkout.', 'sallanet-pay' ),
+			),
+			'enabled'          => array(
+				'title'   => __( 'Enable', 'sallanet-pay' ),
+				'type'    => 'checkbox',
+				'label'   => __( 'Enable sallanet Pay', 'sallanet-pay' ),
+				'default' => 'no',
+			),
+			'title'            => array(
+				'title'   => __( 'Title', 'sallanet-pay' ),
+				'type'    => 'text',
+				'default' => __( 'Pay with Pi (sallanet Pay)', 'sallanet-pay' ),
+			),
+			'description'      => array(
+				'title'   => __( 'Description', 'sallanet-pay' ),
+				'type'    => 'textarea',
+				'default' => __( 'You will be taken to sallanet Pay to complete the payment securely.', 'sallanet-pay' ),
+			),
 			'section_advanced' => array(
 				'title'       => __( 'Advanced', 'sallanet-pay' ),
 				'type'        => 'title',
@@ -148,6 +162,43 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 				'default'     => '',
 			),
 		);
+	}
+
+	/**
+	 * Setup steps for the progress card: [ key, label, hint, done ].
+	 */
+	public function setup_steps() {
+		$key      = trim( (string) $this->get_option( 'api_key' ) );
+		$verified = '' !== $key && hash_equals( (string) get_option( 'sallanet_pay_connection_ok', '' ), wp_hash( $key ) );
+		return array(
+			array( 'section_connect', __( 'Save the API key', 'sallanet-pay' ), __( 'Paste the API key from your sallanet Pay developer dashboard and save.', 'sallanet-pay' ), '' !== $key ),
+			array( 'section_webhook', __( 'Link the webhook', 'sallanet-pay' ), __( 'Copy the webhook URL to your dashboard and paste the webhook secret here.', 'sallanet-pay' ), '' !== trim( (string) $this->get_option( 'webhook_secret' ) ) ),
+			array( 'section_connect', __( 'Check the connection', 'sallanet-pay' ), __( 'Press Check connection after saving.', 'sallanet-pay' ), $verified ),
+			array( 'section_pricing', __( 'Prepare pricing', 'sallanet-pay' ), __( 'Add a rate for your store currency or use Pi as the store currency.', 'sallanet-pay' ), '' !== $this->coin_preview( 100, get_woocommerce_currency() ) ),
+			array( 'section_display', __( 'Turn it on for buyers', 'sallanet-pay' ), __( 'Tick Enable and save.', 'sallanet-pay' ), 'yes' === $this->get_option( 'enabled' ) ),
+		);
+	}
+
+	private function progress_card_html() {
+		$steps = $this->setup_steps();
+		$done  = count( array_filter( wp_list_pluck( $steps, 3 ) ) );
+		$total = count( $steps );
+		$html  = '<div class="sallanet-progress" id="sallanet-progress">';
+		$html .= '<div class="sallanet-progress-head"><strong>' . esc_html__( 'Setup progress', 'sallanet-pay' ) . '</strong><span class="sallanet-count">'
+			/* translators: 1: steps done, 2: all steps */
+			. esc_html( sprintf( __( '%1$d of %2$d steps done', 'sallanet-pay' ), $done, $total ) ) . '</span></div>';
+		$html .= '<div class="sallanet-bar"><span style="width:' . esc_attr( (string) round( 100 * $done / $total ) ) . '%"></span></div><ol>';
+		foreach ( $steps as $i => $step ) {
+			list( $section, $label, $hint, $ok ) = $step;
+			$html .= '<li class="' . ( $ok ? 'is-done' : '' ) . '" data-step="' . ( $i + 1 ) . '"><span class="sallanet-dot">' . ( $ok ? '&#10003;' : (int) ( $i + 1 ) ) . '</span><div>'
+				. '<a href="#' . esc_attr( $this->get_field_key( $section ) ) . '">' . esc_html( $label ) . '</a>'
+				. ( $ok ? '' : '<small>' . esc_html( $hint ) . '</small>' ) . '</div></li>';
+		}
+		$html .= '</ol>';
+		if ( $done === $total ) {
+			$html .= '<p class="sallanet-ready">' . esc_html__( 'All set. Buyers can pay with sallanet Pay.', 'sallanet-pay' ) . '</p>';
+		}
+		return $html . '</div>';
 	}
 
 	public function api() {
@@ -378,12 +429,38 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 	}
 
 	public function admin_options() {
+		?>
+		<style>
+			#mainform .sallanet-progress, #mainform .sallanet-card { background:#fff; border-radius:14px; padding:16px 18px; margin:16px 0; max-width:820px; box-sizing:border-box; }
+			#mainform .sallanet-progress-head { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; font-size:14px; }
+			#mainform .sallanet-progress-head span { color:#50575e; }
+			#mainform .sallanet-bar { height:8px; background:#e8eef7; border-radius:8px; margin:12px 0; overflow:hidden; }
+			#mainform .sallanet-bar span { display:block; height:100%; background:#0c3a7a; border-radius:8px; }
+			#mainform .sallanet-progress ol { list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+			#mainform .sallanet-progress li { display:flex; gap:10px; align-items:flex-start; margin:0; }
+			#mainform .sallanet-progress li a { font-weight:600; text-decoration:none; color:#1d2327; }
+			#mainform .sallanet-progress li small { display:block; color:#646970; margin-top:2px; line-height:1.6; }
+			#mainform .sallanet-dot { flex:0 0 26px; width:26px; height:26px; border-radius:50%; background:#e8eef7; color:#0c3a7a; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; }
+			#mainform .sallanet-progress li.is-done .sallanet-dot { background:#1a7f37; color:#fff; }
+			#mainform .sallanet-progress li.is-done a { color:#50575e; }
+			#mainform .sallanet-ready { margin:12px 0 0; color:#1a7f37; font-weight:600; }
+			#mainform { counter-reset: sallanetstep; }
+			#mainform .sallanet-card h3 { display:flex; align-items:center; gap:10px; margin:0 0 6px; font-size:16px; }
+			#mainform .sallanet-card h3.sallanet-step::before { counter-increment: sallanetstep; content: counter(sallanetstep); flex:0 0 28px; width:28px; height:28px; border-radius:50%; background:#0c3a7a; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:14px; }
+			#mainform .sallanet-card > p { color:#646970; margin:0 0 4px; }
+			#mainform .sallanet-card .form-table { margin:0; }
+			#mainform .sallanet-card.is-advanced { padding:12px 18px; }
+			#mainform .sallanet-card.is-advanced h3 { font-size:14px; margin:0; }
+		</style>
+		<?php
 		parent::admin_options();
 		$nonce = wp_create_nonce( 'sallanet_pay_test' );
 		$texts = array(
 			'copied'   => __( 'Copied', 'sallanet-pay' ),
 			'checking' => __( 'Checking', 'sallanet-pay' ),
 			'failed'   => __( 'Could not reach the site. Try again.', 'sallanet-pay' ),
+			/* translators: 1: steps done, 2: all steps */
+			'count'    => __( '%1$d of %2$d steps done', 'sallanet-pay' ),
 		);
 		?>
 		<script>
@@ -405,9 +482,44 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 					body.append( '_wpnonce', <?php echo wp_json_encode( $nonce ); ?> );
 					fetch( <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>, { method: 'POST', body: body, credentials: 'same-origin' } )
 						.then( function ( r ) { return r.json(); } )
-						.then( function ( r ) { out.textContent = r && r.data ? r.data.message : t.failed; out.style.color = r && r.success ? '#1a7f37' : '#b42318'; } )
+						.then( function ( r ) {
+							out.textContent = r && r.data ? r.data.message : t.failed;
+							out.style.color = r && r.success ? '#1a7f37' : '#b42318';
+							var step = document.querySelector( '#sallanet-progress li[data-step="3"]' );
+							if ( r && r.success && step && ! step.classList.contains( 'is-done' ) ) {
+								step.classList.add( 'is-done' );
+								step.querySelector( '.sallanet-dot' ).innerHTML = '&#10003;';
+								var hint = step.querySelector( 'small' );
+								if ( hint ) { hint.remove(); }
+								var all = document.querySelectorAll( '#sallanet-progress li' ).length;
+								var done = document.querySelectorAll( '#sallanet-progress li.is-done' ).length;
+								var count = document.querySelector( '#sallanet-progress .sallanet-count' );
+								if ( count ) { count.textContent = t.count.replace( '%1$d', done ).replace( '%2$d', all ); }
+								var bar = document.querySelector( '#sallanet-progress .sallanet-bar span' );
+								if ( bar ) { bar.style.width = Math.round( 100 * done / all ) + '%'; }
+							}
+						} )
 						.catch( function () { out.textContent = t.failed; out.style.color = '#b42318'; } );
 				} );
+			}
+			// Each section (title, text, table) becomes a card; the progress card goes first.
+			var form = document.getElementById( 'mainform' );
+			var heads = form ? form.querySelectorAll( 'h3.sallanet-step, h3.sallanet-advanced-toggle' ) : [];
+			heads.forEach( function ( h ) {
+				var card = document.createElement( 'div' );
+				card.className = 'sallanet-card' + ( h.classList.contains( 'sallanet-advanced-toggle' ) ? ' is-advanced' : '' );
+				h.parentNode.insertBefore( card, h );
+				var node = h;
+				while ( node ) {
+					var next = node.nextElementSibling;
+					card.appendChild( node );
+					if ( node.tagName === 'TABLE' ) { break; }
+					node = next;
+				}
+			} );
+			var progress = <?php echo wp_json_encode( $this->progress_card_html() ); ?>;
+			if ( heads.length ) {
+				heads[0].parentNode.insertAdjacentHTML( 'beforebegin', progress );
 			}
 			// Advanced section starts folded.
 			var adv = document.querySelector( 'h3.sallanet-advanced-toggle, h2.sallanet-advanced-toggle, .sallanet-advanced-toggle' );
@@ -439,6 +551,7 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 		}
 		$result = $gateway->api()->transaction_status( wp_generate_uuid4() );
 		if ( 404 === $result['status'] ) {
+			update_option( 'sallanet_pay_connection_ok', wp_hash( trim( (string) $gateway->get_option( 'api_key' ) ) ), false );
 			wp_send_json_success( array( 'message' => __( 'Connected. The API key works.', 'sallanet-pay' ) ) );
 		}
 		if ( 401 === $result['status'] ) {

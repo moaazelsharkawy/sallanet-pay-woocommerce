@@ -36,7 +36,7 @@ Accept **Pi** and **ST** payments in your WooCommerce store through the sallanet
 
 ## Settings
 
-WooCommerce → Settings → Payments → **sallanet Pay**. Settings are grouped in three sections: **Connection**, **Pricing** and **Advanced** (folded).
+WooCommerce → Settings → Payments → **sallanet Pay**. A **Setup progress** card at the top lists five steps (save the API key, link the webhook, check the connection, prepare pricing, turn it on) and ticks each one when it is done. The settings below are numbered step cards: **1 Connect your account**, **2 Link the webhook**, **3 Set pricing**, **4 Show it to buyers**, then a folded **Advanced** card.
 
 | Setting | What it does |
 | --- | --- |
@@ -130,7 +130,7 @@ GPL-2.0-or-later. See [LICENSE](LICENSE).
 
 **الاعدادات**
 
-تلاقيها في WooCommerce ثم الاعدادات ثم المدفوعات ثم سلة باي. ومقسمة 3 اقسام الربط والتسعير ومتقدم. وقسم متقدم مقفول من الاول.
+تلاقيها في WooCommerce ثم الاعدادات ثم المدفوعات ثم سلة باي. فوق الصفحة كارت خطوات التجهيز فيه 5 خطوات. احفظ المفتاح ثم اربط الويب هوك ثم افحص الاتصال ثم جهز التسعير ثم فعلها. وكل خطوة بتاخد علامة صح لما تخلص. وتحت الكارت الاعدادات في كروت مرقمة 1 اربط حسابك و 2 اربط الويب هوك و 3 جهز التسعير و 4 اعرضها للمشترين. وبعدهم كارت متقدم مقفول.
 
 1. **Enable** يظهر سلة باي في صفحة الدفع.
 2. **Title و Description** الاسم والوصف اللي المشتري بيشوفهم في صفحة الدفع.
