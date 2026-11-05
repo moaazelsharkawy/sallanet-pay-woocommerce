@@ -73,9 +73,9 @@ def main():
             t = pairs.get(s, '')
             if not t:
                 print('MISSING [%s]: %s' % (lang, s)); ok = False; continue
-            if sorted(re.findall(r'%\d?\$?s', s)) != sorted(re.findall(r'%\d?\$?s', t)):
+            if sorted(re.findall(r'%\d?\$?[sd]', s)) != sorted(re.findall(r'%\d?\$?[sd]', t)):
                 print('SLOTS [%s]: %s' % (lang, s)); ok = False
-            plain = re.sub(r'%\d?\$?s', '', t)
+            plain = re.sub(r'%\d?\$?[sd]', '', t)
             if lang == 'ar' and re.search(r'[ً-ْ]', t):
                 print('DIACRITICS: ' + t); ok = False
             if lang == 'ar' and re.search(r'[؀-ۿ]', plain) and re.search(r'[،,:;؟?!"«»()\[\]–—…#]', plain):
