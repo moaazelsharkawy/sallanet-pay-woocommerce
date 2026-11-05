@@ -15,6 +15,8 @@ Accept **Pi** and **ST** payments in your WooCommerce store through the sallanet
 - Escrow: money is held until the buyer confirms or the hold period ends. Verified digital stores can release it when an order is marked Completed.
 - Pricing: store currency in Pi or ST (added by the plugin), USD with live Pi price, or a fixed rate for any currency.
 - Works with the classic and block checkout, and with HPOS.
+- Arabic translation built in (used automatically when the site language is Arabic).
+- Checkout card shows the sallanet Pay logo, the approximate amount in coins and an escrow protection note.
 
 ## Requirements
 
@@ -34,7 +36,7 @@ Accept **Pi** and **ST** payments in your WooCommerce store through the sallanet
 
 ## Settings
 
-WooCommerce → Settings → Payments → **sallanet Pay**
+WooCommerce → Settings → Payments → **sallanet Pay**. Settings are grouped in three sections: **Connection**, **Pricing** and **Advanced** (folded).
 
 | Setting | What it does |
 | --- | --- |
@@ -42,10 +44,13 @@ WooCommerce → Settings → Payments → **sallanet Pay**
 | Title / Description | What the buyer sees at checkout. |
 | API key | From your sallanet Pay developer dashboard (shown once when created). **Administrators only.** |
 | App ID | Only if your key has more than one linked app. **Administrators only.** |
-| Webhook secret | Copy the webhook URL shown under this field into your dashboard, then paste the dashboard secret here. **Administrators only.** |
+| Webhook secret | Paste the webhook secret from your dashboard. **Administrators only.** |
+| Webhook URL | The address to put in your dashboard, with a Copy button. **Administrators only.** |
+| Check connection | Tests the saved API key with sallanet Pay. **Administrators only.** |
 | Charge in | The coin the buyer pays: Pi or ST. |
 | Price conversion | How the order total becomes coins (see below). |
 | Fixed rates | How many units of a currency equal 1 coin, one per line, for example `EGP=50` and `USD=1.5`. A number alone applies to the store currency. |
+| Current rates | Shows the rates in use and what 100 of your store currency costs in coins. |
 | Instant settlement | Releases escrow when an order is marked Completed. Only for verified digital stores with instant settlement enabled by sallanet. Leave it off otherwise. |
 | API base URL | Leave empty. |
 
@@ -104,6 +109,8 @@ GPL-2.0-or-later. See [LICENSE](LICENSE).
 5. المبلغ يفضل في الضمان لحد ما المشتري يأكد الاستلام او تخلص مدة الضمان. المتاجر الرقمية الموثقة تقدر تحرر المبلغ لما الطلب يبقى مكتمل.
 6. التسعير بعملة المتجر Pi او ST او بالدولار مع سعر Pi لحظي او بسعر ثابت لاي عملة.
 7. تشتغل مع صفحة الدفع القديمة والجديدة في WooCommerce.
+8. الترجمة العربية مدمجة وبتظهر لوحدها لو لغة الموقع عربي.
+9. بطاقة الدفع فيها لوجو سلة باي والمبلغ التقريبي بالعملة وسطر ان المبلغ محمي بالضمان.
 
 **المتطلبات**
 
@@ -123,18 +130,21 @@ GPL-2.0-or-later. See [LICENSE](LICENSE).
 
 **الاعدادات**
 
-تلاقيها في WooCommerce ثم الاعدادات ثم المدفوعات ثم sallanet Pay.
+تلاقيها في WooCommerce ثم الاعدادات ثم المدفوعات ثم سلة باي. ومقسمة 3 اقسام الربط والتسعير ومتقدم. وقسم متقدم مقفول من الاول.
 
 1. **Enable** يظهر سلة باي في صفحة الدفع.
 2. **Title و Description** الاسم والوصف اللي المشتري بيشوفهم في صفحة الدفع.
 3. **API key** مفتاح الربط من حساب المطور في سلة باي. بيظهر مرة واحدة وقت انشائه. للمدير فقط.
 4. **App ID** معرف التطبيق. مطلوب بس لو المفتاح مربوط باكتر من تطبيق. للمدير فقط.
-5. **Webhook secret** سر الويب هوك. انسخ رابط الويب هوك الظاهر تحت الحقل ده وحطه في حساب المطور وبعدين حط السر هنا. للمدير فقط.
-6. **Charge in** العملة اللي المشتري بيدفع بيها Pi او ST.
-7. **Price conversion** طريقة تحويل اجمالي الطلب لعملة. الشرح تحت.
-8. **Fixed rates** كام وحدة من العملة تساوي عملة واحدة. كل عملة في سطر زي EGP=50 و USD=1.5. ولو كتبت رقم لوحده بيتطبق على عملة المتجر.
-9. **Instant settlement** بيحرر المبلغ من الضمان لما الطلب يبقى مكتمل. للمتاجر الرقمية الموثقة اللي سلة باي فعلت لها التحرير الفوري بس. غير كده سيبه مقفول.
-10. **API base URL** سيبه فاضي.
+5. **Webhook secret** سر الويب هوك من حساب المطور. للمدير فقط.
+6. **Webhook URL** رابط الويب هوك اللي تحطه في حساب المطور ومعاه زرار نسخ. للمدير فقط.
+7. **Check connection** زرار بيفحص مفتاح API المحفوظ مع سلة باي. للمدير فقط.
+8. **Charge in** العملة اللي المشتري بيدفع بيها Pi او ST.
+9. **Price conversion** طريقة تحويل اجمالي الطلب لعملة. الشرح تحت.
+10. **Fixed rates** كام وحدة من العملة تساوي عملة واحدة. كل عملة في سطر زي EGP=50 و USD=1.5. ولو كتبت رقم لوحده بيتطبق على عملة المتجر.
+11. **Current rates** بيوريك الاسعار المستخدمة و 100 من عملة متجرك تساوي كام عملة.
+12. **Instant settlement** بيحرر المبلغ من الضمان لما الطلب يبقى مكتمل. للمتاجر الرقمية الموثقة اللي سلة باي فعلت لها التحرير الفوري بس. غير كده سيبه مقفول.
+13. **API base URL** سيبه فاضي.
 
 مدير المتجر يقدر يستخدم طريقة الدفع ويغير باقي الاعدادات. لكن مش هيشوف ولا هيغير المفتاح ومعرف التطبيق وسر الويب هوك ورابط API. دول لمدير الموقع بس.
 
