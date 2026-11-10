@@ -12,6 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Sallanet_Pay_Webhook {
 
+	/** Seconds a signed delivery stays valid. */
+	const MAX_AGE = 900;
+
 	public static function init() {
 		add_action( 'rest_api_init', array( __CLASS__, 'register_route' ) );
 	}
@@ -70,6 +73,11 @@ class Sallanet_Pay_Webhook {
 			return new WP_REST_Response( array( 'error' => 'invalid body' ), 400 );
 		}
 		$event = (string) ( $payload['event'] ?? '' );
+		// An old signed body sent again is refused: every delivery carries the time it was sent.
+		$sent_at = strtotime( (string) ( $payload['timestamp'] ?? '' ) );
+		if ( ! $sent_at || abs( time() - $sent_at ) > self::MAX_AGE ) {
+			return new WP_REST_Response( array( 'error' => 'stale webhook' ), 400 );
+		}
 		if ( 'webhook.test' === $event ) {
 			return new WP_REST_Response( array( 'ok' => true ), 200 );
 		}
@@ -94,7 +102,12 @@ class Sallanet_Pay_Webhook {
 
 		switch ( $event ) {
 			case 'payment.success':
-				Sallanet_Pay_Gateway::settle_order( $order, $tx_id, $status, $amount, $currency, 'webhook' );
+				// Mark paid only on the live status from sallanet, never on the body alone.
+				$live = $gateway->api()->transaction_status( $tx_id );
+				if ( $live['ok'] && ! empty( $live['data']['transaction'] ) ) {
+					$tx = $live['data']['transaction'];
+					Sallanet_Pay_Gateway::settle_order( $order, $tx_id, $tx['status'] ?? '', $tx['amount'] ?? 0, $tx['currency'] ?? '', 'webhook' );
+				}
 				break;
 			case 'payment.confirmed':
 				Sallanet_Pay_Gateway::settle_order( $order, $tx_id, 'confirmed', $order->get_meta( Sallanet_Pay_Gateway::META_AMOUNT ), $order->get_meta( Sallanet_Pay_Gateway::META_CURRENCY ), 'webhook' );

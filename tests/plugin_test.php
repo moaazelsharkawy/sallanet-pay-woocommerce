@@ -2,6 +2,7 @@
 $fails = 0;
 function check($c, $m) { global $fails; echo ($c ? "PASS " : "FAIL ") . $m . "\n"; if (!$c) $fails++; }
 function hook($payload, $secret = 'whsec_test') {
+  if (!array_key_exists('timestamp', $payload)) $payload['timestamp'] = gmdate('c');
   $raw = json_encode($payload);
   $r = new WP_REST_Request('POST', '/sallanet-pay/v1/webhook');
   $r->set_body($raw); $r->set_header('Content-Type', 'application/json');
@@ -13,6 +14,7 @@ function mkorder() {
   $o->set_payment_method('sallanet_pay'); $o->calculate_totals(); $o->save(); return $o;
 }
 function mock() { return json_decode(file_get_contents('/tmp/wpt/mock/state.json'), true); }
+function setst($tx, $status) { $s = mock(); $s['tx'][$tx]['status'] = $status; file_put_contents('/tmp/wpt/mock/state.json', json_encode($s)); }
 $gw = WC()->payment_gateways()->payment_gateways()['sallanet_pay'];
 check($gw && $gw->is_available(), 'gateway available');
 
@@ -31,8 +33,12 @@ $bad = hook(['event'=>'payment.success','transaction_id'=>$tx,'status'=>'escrow'
 check($bad->get_status() === 401, 'bad signature rejected 401');
 check(!wc_get_order($o->get_id())->is_paid(), 'still unpaid after bad signature');
 
-$mis = hook(['event'=>'payment.success','transaction_id'=>$tx,'status'=>'escrow','amount'=>1,'currency'=>'pi','delivery_id'=>'d0']);
-check($mis->get_status() === 200 && !wc_get_order($o->get_id())->is_paid(), 'amount mismatch not paid');
+$mis = hook(['event'=>'payment.success','transaction_id'=>$tx,'status'=>'escrow','amount'=>41.48,'currency'=>'pi','delivery_id'=>'d0']);
+check($mis->get_status() === 200 && !wc_get_order($o->get_id())->is_paid(), 'body says escrow, live status pending: not paid');
+$old = hook(['event'=>'payment.success','transaction_id'=>$tx,'status'=>'escrow','amount'=>41.48,'currency'=>'pi','delivery_id'=>'d00','timestamp'=>gmdate('c', time() - 3600)]);
+check($old->get_status() === 400, 'body older than 15 minutes refused');
+check(hook(['event'=>'webhook.test','timestamp'=>null])->get_status() === 400, 'body with no time refused');
+setst($tx, 'escrow');
 
 $ok = hook(['event'=>'payment.success','transaction_id'=>$tx,'status'=>'escrow','amount'=>41.48,'currency'=>'pi','delivery_id'=>'d1']);
 $o = wc_get_order($o->get_id());
@@ -49,6 +55,7 @@ $m = mock(); check(($m['tx'][$tx]['refunds'][0] ?? null) == 10.37, 'partial refu
 $r = wc_create_refund(['order_id'=>$o->get_id(), 'amount'=>1, 'refund_payment'=>true]);
 check(is_wp_error($r) && count(mock()['tx'][$tx]['refunds']) === 1, 'second refund blocked (one refund per tx)');
 $o4 = mkorder(); $gw->process_payment($o4->get_id()); $tx4 = wc_get_order($o4->get_id())->get_meta('_sallanet_tx_id');
+setst($tx4, 'escrow');
 hook(['event'=>'payment.success','transaction_id'=>$tx4,'status'=>'escrow','amount'=>41.48,'currency'=>'pi','delivery_id'=>'f1']);
 $r = wc_create_refund(['order_id'=>$o4->get_id(), 'amount'=>20.74, 'refund_payment'=>true]);
 check(!is_wp_error($r) && mock()['tx'][$tx4]['refunds'][0] === 'full' && wc_get_order($o4->get_id())->has_status('refunded'), 'full refund sends no amount, order refunded');
@@ -68,10 +75,14 @@ check(mock()['tx'][$tx2]['status'] === 'confirmed', 'completed order released es
 
 // 4. external refund marks order refunded
 $o3 = mkorder(); $gw->process_payment($o3->get_id()); $tx3 = wc_get_order($o3->get_id())->get_meta('_sallanet_tx_id');
+setst($tx3, 'escrow');
 hook(['event'=>'payment.success','transaction_id'=>$tx3,'status'=>'escrow','amount'=>41.48,'currency'=>'pi','delivery_id'=>'e1']);
 hook(['event'=>'payment.refunded','transaction_id'=>$tx3,'status'=>'refunded','amount'=>41.48,'currency'=>'pi','delivery_id'=>'e2']);
 check(wc_get_order($o3->get_id())->has_status('refunded'), 'external refund -> refunded');
+hook(['event'=>'payment.success','transaction_id'=>$tx3,'status'=>'escrow','amount'=>41.48,'currency'=>'pi','delivery_id'=>'e3']);
+check(wc_get_order($o3->get_id())->has_status('refunded'), 'payment message never reopens a refunded order');
 $o5 = mkorder(); $gw->process_payment($o5->get_id()); $tx5 = wc_get_order($o5->get_id())->get_meta('_sallanet_tx_id');
+setst($tx5, 'escrow');
 hook(['event'=>'payment.success','transaction_id'=>$tx5,'status'=>'escrow','amount'=>41.48,'currency'=>'pi','delivery_id'=>'g1']);
 hook(['event'=>'payment.refunded','transaction_id'=>$tx5,'status'=>'refunded','amount'=>10,'currency'=>'pi','delivery_id'=>'g2']);
 check(wc_get_order($o5->get_id())->has_status('processing'), 'external partial refund only adds note');

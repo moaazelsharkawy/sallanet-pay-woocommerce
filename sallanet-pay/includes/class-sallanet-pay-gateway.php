@@ -642,6 +642,12 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 		if ( $order->is_paid() ) {
 			return true;
 		}
+		// A refunded order is never reopened by a payment message. A cancelled order that the
+		// live status shows as paid is still settled, so a late payment is not lost.
+		if ( $order->has_status( 'refunded' ) || $order->get_refunds() ) {
+			$order->add_order_note( 'sallanet Pay: payment message for a refunded order ignored (' . esc_html( $source ) . ').' );
+			return false;
+		}
 		$order->add_order_note(
 			sprintf(
 				/* translators: 1: amount, 2: coin, 3: source */
