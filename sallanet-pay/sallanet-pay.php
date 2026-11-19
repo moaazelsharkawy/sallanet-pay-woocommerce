@@ -3,7 +3,7 @@
  * Plugin Name: sallanet Pay for WooCommerce
  * Plugin URI: https://github.com/moaazelsharkawy/sallanet-pay-woocommerce
  * Description: Accept Pi and ST payments in WooCommerce through sallanet Pay (hosted checkout, signed webhooks, refunds).
- * Version: 0.4.1
+ * Version: 0.5.0
  * Author: sallanet
  * Requires at least: 6.2
  * Requires PHP: 7.4
@@ -19,10 +19,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SALLANET_PAY_VERSION', '0.4.1' );
+define( 'SALLANET_PAY_VERSION', '0.5.0' );
 define( 'SALLANET_PAY_FILE', __FILE__ );
 define( 'SALLANET_PAY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SALLANET_PAY_URL', plugin_dir_url( __FILE__ ) );
+
+// Domain ownership check: serves the code from the dashboard at
+// /.well-known/sallanet-pay.txt so sallanet Pay can verify this site.
+// Only a well formed code is ever printed.
+add_action(
+	'init',
+	function () {
+		$uri  = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+		$path = (string) wp_parse_url( $uri, PHP_URL_PATH );
+		$home = rtrim( (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH ), '/' );
+		if ( $path !== $home . '/.well-known/sallanet-pay.txt' && '/.well-known/sallanet-pay.txt' !== $path ) {
+			return;
+		}
+		$settings = get_option( 'woocommerce_sallanet_pay_settings', array() );
+		$code     = is_array( $settings ) && isset( $settings['domain_token'] ) ? trim( (string) $settings['domain_token'] ) : '';
+		if ( ! preg_match( '/^sallanet-pay-verify=[0-9a-f]{32}$/', $code ) ) {
+			return;
+		}
+		nocache_headers();
+		header( 'Content-Type: text/plain; charset=utf-8' );
+		header( 'X-Robots-Tag: noindex' );
+		echo $code; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- matched by the pattern above.
+		exit;
+	},
+	0
+);
 
 // HPOS and block checkout compatibility.
 add_action(

@@ -9,6 +9,8 @@ return array('domain'=>'sallanet-pay','plural-forms'=>'nplurals=6; plural=(n==0 
 'From your sallanet Pay developer dashboard. It is shown only once when created.'=>'من حساب المطور في سلة باي. يظهر مرة واحدة فقط عند انشائه.',
 'App ID (optional)'=>'معرف التطبيق اختياري',
 'Needed only if your key has more than one linked app.'=>'مطلوب فقط لو المفتاح مربوط باكثر من تطبيق.',
+'Domain verification code'=>'كود تاكيد الموقع',
+'Copy it from your sallanet Pay dashboard. The plugin serves it at /.well-known/sallanet-pay.txt, then tap Verify now in the dashboard.'=>'انسخه من حسابك في سلة باي. الاضافة تعرضه في الرابط /.well-known/sallanet-pay.txt ثم اضغط تاكيد الان في حسابك.',
 'Check connection'=>'فحص الاتصال',
 'Link the webhook'=>'اربط الويب هوك',
 'sallanet Pay tells your store when a payment arrives or is refunded.'=>'سلة باي تبلغ متجرك عند وصول دفعة او استردادها.',

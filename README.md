@@ -44,6 +44,7 @@ WooCommerce → Settings → Payments → **sallanet Pay**. A **Setup progress**
 | Title / Description | What the buyer sees at checkout. |
 | API key | From your sallanet Pay developer dashboard (shown once when created). **Administrators only.** |
 | App ID | Only if your key has more than one linked app. **Administrators only.** |
+| Domain verification code | Paste the code from your dashboard. The plugin serves it at `/.well-known/sallanet-pay.txt`, then tap **Verify now** in the dashboard. Payments start only after the site is verified. **Administrators only.** |
 | Webhook secret | Paste the webhook secret from your dashboard. **Administrators only.** |
 | Webhook URL | The address to put in your dashboard, with a Copy button. **Administrators only.** |
 | Check connection | Tests the saved API key with sallanet Pay. **Administrators only.** |
@@ -136,6 +137,7 @@ GPL-2.0-or-later. See [LICENSE](LICENSE).
 2. **Title و Description** الاسم والوصف اللي المشتري بيشوفهم في صفحة الدفع.
 3. **API key** مفتاح الربط من حساب المطور في سلة باي. بيظهر مرة واحدة وقت انشائه. للمدير فقط.
 4. **App ID** معرف التطبيق. مطلوب بس لو المفتاح مربوط باكتر من تطبيق. للمدير فقط.
+4. **Domain verification code** كود تاكيد الموقع من حسابك في سلة باي. الاضافة بتعرضه في الرابط `/.well-known/sallanet-pay.txt` وبعدين تضغط تاكيد الان في حسابك. الدفع بيشتغل بعد التاكيد بس. للمدير فقط.
 5. **Webhook secret** سر الويب هوك من حساب المطور. للمدير فقط.
 6. **Webhook URL** رابط الويب هوك اللي تحطه في حساب المطور ومعاه زرار نسخ. للمدير فقط.
 7. **Check connection** زرار بيفحص مفتاح API المحفوظ مع سلة باي. للمدير فقط.
