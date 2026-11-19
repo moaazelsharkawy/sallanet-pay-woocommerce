@@ -63,6 +63,13 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 				'description' => __( 'Needed only if your key has more than one linked app.', 'sallanet-pay' ),
 				'default'     => '',
 			),
+			'domain_token'     => array(
+				'title'       => __( 'Domain verification code', 'sallanet-pay' ),
+				'type'        => 'text',
+				'description' => __( 'Copy it from your sallanet Pay dashboard. The plugin serves it at /.well-known/sallanet-pay.txt, then tap Verify now in the dashboard.', 'sallanet-pay' ),
+				'default'     => '',
+				'placeholder' => 'sallanet-pay-verify=...',
+			),
 			'test_connection'  => array(
 				'title' => __( 'Check connection', 'sallanet-pay' ),
 				'type'  => 'sallanet_info',
@@ -271,7 +278,7 @@ class Sallanet_Pay_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Keys only administrators may see or change (shop managers cannot).
 	 */
-	const ADMIN_ONLY = array( 'api_key', 'webhook_secret', 'app_id', 'api_base', 'webhook_url', 'test_connection' );
+	const ADMIN_ONLY = array( 'api_key', 'webhook_secret', 'app_id', 'domain_token', 'api_base', 'webhook_url', 'test_connection' );
 
 	public function get_form_fields() {
 		$fields = parent::get_form_fields();
